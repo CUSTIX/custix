@@ -27,9 +27,7 @@ jobs:
         env:
           VITE_SITE_URL: ${{ vars.SITE_URL }}
 
-      - name: Install Chromium for the smoke test
-        run: npx playwright@1.52.0 install --with-deps chromium
-
+      # GitHub runners ship Google Chrome; the smoke test finds it at /usr/bin/google-chrome.
       - name: Smoke test (headless)
         run: npm run test:e2e
 
