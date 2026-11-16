@@ -63,6 +63,27 @@
   .note a { color: var(--land); }
   footer { font-size: .66rem; color: var(--muted); letter-spacing: .04em; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
   footer .credits { opacity: .8; }
+  .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .74rem; color: var(--muted); }
+  .player button { padding: .5rem .7rem; }
+  #pPlay { min-width: 2.6rem; background: var(--hot); border-color: var(--hot); color: #fff; }
+  .ptime { font-variant-numeric: tabular-nums; color: var(--ink); min-width: 7.5rem; }
+  #pSeek { flex: 1 1 220px; min-width: 0; accent-color: var(--amber); }
+  .player label { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; text-transform: uppercase; }
+  .player select { font: 600 .78rem var(--mono); color: var(--ink); background: #0a1a45; border: 1px solid var(--line); border-radius: 6px; padding: .3rem; }
+  #pShift { width: 110px; accent-color: var(--land); }
+  #pShiftOut { color: var(--ink); min-width: 3.4rem; font-variant-numeric: tabular-nums; }
+  .editor { position: fixed; z-index: 6; top: 12px; bottom: 12px; right: max(12px, env(safe-area-inset-right, 0px)); width: min(380px, calc(100% - 24px));
+    background: #0a1a45; border: 1px solid var(--line); border-radius: 12px; padding: 14px; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.5); font-size: .78rem; }
+  .ed-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .editor h2 { font-family: var(--display); letter-spacing: .1em; text-transform: uppercase; margin: 0; font-size: .95rem; color: var(--amber); }
+  .editor p { color: var(--muted); line-height: 1.5; }
+  .editor ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .editor li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px; border-radius: 8px; border: 1px solid transparent; }
+  .editor li.is-now { border-color: var(--amber); background: rgba(255,201,61,.08); }
+  .editor li span { min-width: 0; overflow-wrap: anywhere; }
+  .ed-time { padding: .3rem .45rem; font-size: .74rem; font-variant-numeric: tabular-nums; }
+  .ed-btns { display: flex; gap: 4px; }
+  .ed-btns button { padding: .3rem .45rem; font-size: .72rem; }
   dialog { background: #0a1a45; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(560px, calc(100% - 32px)); }
   dialog::backdrop { background: rgba(2, 8, 24, .7); }
   .dlg { padding: 18px; display: grid; gap: 10px; font-size: .82rem; line-height: 1.5; }
@@ -142,6 +163,21 @@
       Don't have it? <a href="https://open.spotify.com/search/ako%20ang%20bagyo%20shean" target="_blank" rel="noopener">Find "Ako ang Bagyo" by SHEAN</a>.</p>
   </section>
 </div>
+<div class="player" id="player">
+  <button type="button" id="pPlay" aria-label="Play or pause">▶</button>
+  <span id="pTime" class="ptime">0:00 / 1:30</span>
+  <input type="range" id="pSeek" min="0" max="1000" value="0" aria-label="Song position">
+  <button type="button" id="pBack" aria-label="Back 5 seconds">−5s</button>
+  <button type="button" id="pFwd" aria-label="Forward 5 seconds">+5s</button>
+  <label for="pRate">Speed <select id="pRate"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label>
+  <label for="pShift">Lyrics offset <input type="range" id="pShift" min="-3" max="3" step="0.1" value="0"><output id="pShiftOut" for="pShift">0.0 s</output></label>
+  <button type="button" id="pEdit" aria-expanded="false" aria-controls="editor">Edit timings</button>
+</div>
+<aside id="editor" class="editor" hidden aria-label="Lyric timings">
+  <div class="ed-head"><h2>Lyric timings</h2><button type="button" id="edClose">Close</button></div>
+  <p>Click a time to jump there. Use −/+ to nudge by 0.1 s, or <em>Now</em> to set the line to the current position. Changes save as you go.</p>
+  <ol id="edList"></ol>
+</aside>
 <footer><span id="status">Load the song, then press Start. Without a song the storm runs on its own for 90 seconds.</span>
   <span class="credits">Fan-made, for fun. "Ako ang Bagyo" © SHEAN and its rights holders: this page does not host the song or its lyrics; they play only from your own device. Map: Natural Earth (public domain). Not a weather forecast.</span></footer>
 
@@ -467,10 +503,13 @@
     if (!lines.length) return -1;
     if (lines.every((l) => l.time === null)) return Math.min(lines.length - 1, Math.floor((now / duration()) * lines.length));
     let idx = -1;
-    lines.forEach((l, i) => { if (l.time !== null && l.time <= now) idx = i; });
+    lines.forEach((l, i) => { if (l.time !== null && l.time + shift <= now) idx = i; });
     return idx;
   }
   let shownLine = -2, lineAt = 0;
+  // global offset: positive shows every line later, negative earlier (kept in this browser)
+  let shift = 0;
+  try { shift = parseFloat(localStorage.getItem(KEY + ":shift")) || 0; } catch { /* optional */ }
 
   // ---- playback ------------------------------------------------------------
   const FALLBACK = 90;  // seconds, when no song is loaded
@@ -552,15 +591,74 @@
     if (!file) return;
     if (audio.src) URL.revokeObjectURL(audio.src);
     audio.src = URL.createObjectURL(file);
+    audio.playbackRate = rate;
+    audio.addEventListener("loadedmetadata", () => { audio.playbackRate = rate; }, { once: true });
     $("fileLabel").classList.add("has-song");
     $("fileLabel").lastChild.textContent = "♪ " + file.name.replace(/\.[^.]+$/, "").slice(0, 22);
     pause(); clock = 0;
     $("status").textContent = "Song loaded. Press Start.";
   });
 
+  // ---- music bar and timing editor ------------------------------------------
+  const nowSec = () => (audio.src && isFinite(audio.duration) ? audio.currentTime : clock);
+  const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  let rate = 1;
+  function seekSec(s) { seekTo(s / duration()); renderEditor(); }
+  $("pPlay").addEventListener("click", () => (running ? pause() : play()));
+  $("pBack").addEventListener("click", () => seekSec(Math.max(0, nowSec() - 5)));
+  $("pFwd").addEventListener("click", () => seekSec(Math.min(duration() - 0.1, nowSec() + 5)));
+  let dragging = false;
+  $("pSeek").addEventListener("input", (e) => { dragging = true; seekTo(e.target.value / 1000); });
+  $("pSeek").addEventListener("change", () => { dragging = false; });
+  $("pRate").addEventListener("change", (e) => { rate = parseFloat(e.target.value); audio.playbackRate = rate; });
+  function showShift() { $("pShift").value = shift; $("pShiftOut").textContent = (shift > 0 ? "+" : "") + shift.toFixed(1) + " s"; }
+  showShift();
+  $("pShift").addEventListener("input", (e) => {
+    shift = parseFloat(e.target.value) || 0; showShift();
+    try { localStorage.setItem(KEY + ":shift", String(shift)); } catch { /* optional */ }
+  });
+
+  function saveTimings() {
+    const lrc = lines.map((l) => (l.time !== null ? fmt(l.time) + " " : "") + l.text).join("\n");
+    store.set(lrc); $("lyricsText").value = lrc;
+  }
+  function renderEditor() {
+    const list = $("edList");
+    if ($("editor").hidden) return;
+    list.textContent = "";
+    if (!lines.length) { const li = document.createElement("li"); li.textContent = "No lyrics yet. Paste them in the Lyrics panel first."; list.appendChild(li); return; }
+    lines.forEach((l, i) => {
+      const li = document.createElement("li"); li.dataset.i = i;
+      const tb = document.createElement("button"); tb.type = "button"; tb.className = "ed-time";
+      tb.textContent = l.time === null ? "--:--" : fmt(l.time).slice(1, -1);
+      tb.title = "Jump here"; tb.addEventListener("click", () => { if (l.time !== null) seekSec(Math.max(0, l.time + shift - 0.5)); });
+      const txt = document.createElement("span"); txt.textContent = l.text;
+      const btns = document.createElement("div"); btns.className = "ed-btns";
+      const mk = (label, title, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.title = title; b.addEventListener("click", fn); btns.appendChild(b); };
+      const nudge = (d) => () => { l.time = Math.max(0, (l.time ?? nowSec()) + d); saveTimings(); renderEditor(); };
+      mk("−", "0.1 s earlier", nudge(-0.1));
+      mk("+", "0.1 s later", nudge(0.1));
+      mk("Now", "Set to the current position", () => { l.time = Math.max(0, nowSec() - shift); saveTimings(); renderEditor(); });
+      li.append(tb, txt, btns); list.appendChild(li);
+    });
+    markEditor(shownLine);
+  }
+  function markEditor(idx) {
+    $("edList").querySelectorAll("li").forEach((li) => li.classList.toggle("is-now", +li.dataset.i === idx));
+    const cur = $("edList").querySelector("li.is-now");
+    if (cur && !$("editor").hidden) cur.scrollIntoView({ block: "nearest" });
+  }
+  function toggleEditor(open) {
+    $("editor").hidden = !open; $("pEdit").setAttribute("aria-expanded", String(open));
+    if (open) renderEditor();
+  }
+  $("pEdit").addEventListener("click", () => toggleEditor($("editor").hidden));
+  $("edClose").addEventListener("click", () => toggleEditor(false));
+  $("lyricsSave").addEventListener("click", renderEditor);
+
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    if (running && !audio.src) clock = Math.min(FALLBACK, clock + dt);
+    if (running && !audio.src) clock = Math.min(FALLBACK, clock + dt * rate);
     if (running && !audio.src && clock >= FALLBACK) { running = false; setStart(); $("status").textContent = "Lumabas na ng PAR. Press Restart to run it again."; }
 
     const u = progress(), f = strength(u);
@@ -584,7 +682,7 @@
     label(name, x, y - R * 0.16, Math.max(14, S * 0.75), "#ffffff");
     // current lyric line rides with the storm and slides in when it changes
     const li = currentLine(audio.src ? audio.currentTime : clock);
-    if (li !== shownLine) { shownLine = li; lineAt = t; }
+    if (li !== shownLine) { shownLine = li; lineAt = t; markEditor(li); }
     if (li >= 0) {
       const k = Math.min(1, (t - lineAt) / 0.45), ease = 1 - (1 - k) ** 3;
       ctx.save(); ctx.globalAlpha = ease;
@@ -611,6 +709,10 @@
     drawHover(u, x, y, R);
     $("bar").style.width = (u * 100).toFixed(1) + "%";
     $("seek").setAttribute("aria-valuenow", Math.round(u * 100));
+    $("pTime").textContent = `${mmss(nowSec())} / ${mmss(duration())}`;
+    if (!dragging) $("pSeek").value = Math.round(u * 1000);
+    const icon = running ? "❚❚" : "▶";
+    if ($("pPlay").textContent !== icon) $("pPlay").textContent = icon;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
