@@ -76,6 +76,14 @@
   #stormPos { flex: 1 1 260px; min-width: 0; accent-color: var(--hot); }
   #stormOut { color: var(--ink); min-width: 9rem; }
   #stormFollow[disabled] { opacity: .45; cursor: default; }
+  .toggle-ui { position: absolute; z-index: 4; top: 10px; left: 50%; transform: translateX(-50%); padding: .45rem .75rem; font-size: .72rem;
+    background: rgba(6,16,44,.75); backdrop-filter: blur(4px); transition: opacity .4s; }
+  /* clean view: only the radar, the advisory and the lyrics */
+  body.clean header, body.clean .player, body.clean footer, body.clean .editor { display: none !important; }
+  body.clean .stage { border-color: transparent; }
+  body.clean.idle .toggle-ui { opacity: 0; }
+  body.clean.idle .stage, body.clean.idle canvas { cursor: none; }
+  @media (prefers-reduced-motion: reduce) { .toggle-ui { transition: none; } }
   #pShiftOut { color: var(--ink); min-width: 3.4rem; font-variant-numeric: tabular-nums; }
   .editor { position: fixed; z-index: 6; top: 12px; bottom: 12px; right: max(12px, env(safe-area-inset-right, 0px)); width: min(380px, calc(100% - 24px));
     background: #0a1a45; border: 1px solid var(--line); border-radius: 12px; padding: 14px; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.5); font-size: .78rem; }
@@ -151,6 +159,7 @@
 
 <div class="stage" id="stage">
   <canvas id="radar" aria-label="Animated radar of a typhoon moving toward the Philippines"></canvas>
+  <button type="button" id="toggleUi" class="toggle-ui" aria-pressed="false" title="Hide or show the controls (H)">Hide controls</button>
   <section class="bulletin" aria-live="polite">
     <h2>Mock weather advisory</h2>
     <dl>
@@ -667,6 +676,27 @@
   $("pEdit").addEventListener("click", () => toggleEditor($("editor").hidden));
   $("edClose").addEventListener("click", () => toggleEditor(false));
   $("lyricsSave").addEventListener("click", renderEditor);
+
+  // hide / show the controls (button or H); in the clean view the button fades when the mouse rests
+  let idleTimer = 0;
+  function setClean(on) {
+    document.body.classList.toggle("clean", on);
+    $("toggleUi").setAttribute("aria-pressed", String(on));
+    $("toggleUi").textContent = on ? "Show controls" : "Hide controls";
+    wake();
+  }
+  function wake() {
+    document.body.classList.remove("idle");
+    clearTimeout(idleTimer);
+    if (document.body.classList.contains("clean")) idleTimer = setTimeout(() => document.body.classList.add("idle"), 2500);
+  }
+  $("toggleUi").addEventListener("click", () => setClean(!document.body.classList.contains("clean")));
+  ["pointermove", "pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, wake, { passive: true }));
+  document.addEventListener("keydown", (e) => {
+    if ((e.key === "h" || e.key === "H") && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$("lyricsDlg").open) {
+      setClean(!document.body.classList.contains("clean"));
+    }
+  });
 
   // storm position: a lead (or lag) on top of the song, set with the slider
   let lead = 0, stormDragging = false;
