@@ -71,6 +71,11 @@
   .player label { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; text-transform: uppercase; }
   .player select { font: 600 .78rem var(--mono); color: var(--ink); background: #0a1a45; border: 1px solid var(--line); border-radius: 6px; padding: .3rem; }
   #pShift { width: 110px; accent-color: var(--land); }
+  .storm-row { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .storm-row label { letter-spacing: .06em; text-transform: uppercase; }
+  #stormPos { flex: 1 1 260px; min-width: 0; accent-color: var(--hot); }
+  #stormOut { color: var(--ink); min-width: 9rem; }
+  #stormFollow[disabled] { opacity: .45; cursor: default; }
   #pShiftOut { color: var(--ink); min-width: 3.4rem; font-variant-numeric: tabular-nums; }
   .editor { position: fixed; z-index: 6; top: 12px; bottom: 12px; right: max(12px, env(safe-area-inset-right, 0px)); width: min(380px, calc(100% - 24px));
     background: #0a1a45; border: 1px solid var(--line); border-radius: 12px; padding: 14px; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.5); font-size: .78rem; }
@@ -172,6 +177,12 @@
   <label for="pRate">Speed <select id="pRate"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label>
   <label for="pShift">Lyrics offset <input type="range" id="pShift" min="-3" max="3" step="0.1" value="0"><output id="pShiftOut" for="pShift">0.0 s</output></label>
   <button type="button" id="pEdit" aria-expanded="false" aria-controls="editor">Edit timings</button>
+  <div class="storm-row">
+    <label for="stormPos">Storm position</label>
+    <input type="range" id="stormPos" min="0" max="1000" value="0" aria-label="Typhoon position along its track">
+    <output id="stormOut" for="stormPos">Pacific</output>
+    <button type="button" id="stormFollow" disabled>Follow song</button>
+  </div>
 </div>
 <aside id="editor" class="editor" hidden aria-label="Lyric timings">
   <div class="ed-head"><h2>Lyric timings</h2><button type="button" id="edClose">Close</button></div>
@@ -581,6 +592,7 @@
   function pause() { running = false; audio.pause(); stopSound(); setStart(); }
   function restart(autoplay = true) {
     clock = 0; audio.currentTime = 0;
+    if (typeof lead !== "undefined") { lead = 0; $("stormFollow").disabled = true; }
     if (autoplay) play(); else setStart();
   }
   $("start").addEventListener("click", () => (running ? pause() : play()));
@@ -656,12 +668,25 @@
   $("edClose").addEventListener("click", () => toggleEditor(false));
   $("lyricsSave").addEventListener("click", renderEditor);
 
+  // storm position: a lead (or lag) on top of the song, set with the slider
+  let lead = 0, stormDragging = false;
+  $("stormPos").addEventListener("input", (e) => {
+    stormDragging = true;
+    lead = e.target.value / 1000 - progress();
+    $("stormFollow").disabled = Math.abs(lead) < 0.002;
+  });
+  $("stormPos").addEventListener("change", () => { stormDragging = false; });
+  $("stormFollow").addEventListener("click", () => { lead = 0; $("stormFollow").disabled = true; });
+
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (running && !audio.src) clock = Math.min(FALLBACK, clock + dt * rate);
     if (running && !audio.src && clock >= FALLBACK) { running = false; setStart(); $("status").textContent = "Lumabas na ng PAR. Press Restart to run it again."; }
 
-    const u = progress(), f = strength(u);
+    const u = Math.min(1, Math.max(0, progress() + lead)), f = strength(u);
+    if (!stormDragging) $("stormPos").value = Math.round(u * 1000);
+    const where = u <= 0.001 ? "Pacific" : u >= LANDFALL - 0.01 && u <= LANDFALL + 0.03 ? "Landfall" : u > LANDFALL ? "Past landfall" : `${Math.round((u / LANDFALL) * 100)}% of the way to landfall`;
+    if ($("stormOut").textContent !== where) $("stormOut").textContent = where;
     t += dt; rot += dt * (reduced ? 0.3 : 0.7 + 1.6 * f) * (running ? 1 : 0.35);
     const [lon, lat] = trackAt(u), [x, y] = P(lon, lat), R = S * (W < 640 ? 1.5 + 1.6 * f : 2.4 + 2.4 * f);
 
@@ -707,10 +732,10 @@
       $("bLand").textContent = land; $("bTime").textContent = stamp(u);
     }
     drawHover(u, x, y, R);
-    $("bar").style.width = (u * 100).toFixed(1) + "%";
-    $("seek").setAttribute("aria-valuenow", Math.round(u * 100));
+    $("bar").style.width = (progress() * 100).toFixed(1) + "%";
+    $("seek").setAttribute("aria-valuenow", Math.round(progress() * 100));
     $("pTime").textContent = `${mmss(nowSec())} / ${mmss(duration())}`;
-    if (!dragging) $("pSeek").value = Math.round(u * 1000);
+    if (!dragging) $("pSeek").value = Math.round(progress() * 1000);
     const icon = running ? "❚❚" : "▶";
     if ($("pPlay").textContent !== icon) $("pPlay").textContent = icon;
     requestAnimationFrame(frame);
