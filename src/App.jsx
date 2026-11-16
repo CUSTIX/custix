@@ -74,6 +74,13 @@ const Backdrop = () => (
 
 function App() {
   const reduced = useReducedMotion();
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem("custix-theme") || "dark";
+    } catch {
+      return "dark";
+    }
+  });
   // The intro plays once per browser session; reduced-motion users skip it.
   const [introDone, setIntroDone] = useState(() => Boolean(reduced) || introAlreadySeen());
   // Page entrance, decided once: wait for the intro, or fade in right away
@@ -87,6 +94,15 @@ function App() {
     }
     setIntroDone(true);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem("custix-theme", theme);
+    } catch {
+      // Theme preference is optional; the current session still updates.
+    }
+  }, [theme]);
 
   // Deep links (/#work): the intro locks scrolling before the browser can
   // jump, so apply the hash ourselves once the page is interactive.
@@ -161,6 +177,18 @@ function App() {
             {/* inert while a modal is open so Tab and screen readers stay inside it */}
             <div className={cx("relative z-10", pageIn)} inert={modalOpen || undefined}>
               <Navbar activeSection={activeSection} />
+              <button
+                type="button"
+                className="cx-theme-toggle"
+                onClick={() => setTheme((value) => (value === "dark" ? "light" : "dark"))}
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                aria-pressed={theme === "dark"}
+              >
+                <span className="cx-theme-toggle__track">
+                  <span className={theme === "dark" ? "is-dark" : ""}>{theme === "dark" ? "☾" : "☼"}</span>
+                </span>
+                <span className="cx-theme-toggle__label">{theme === "dark" ? "Dark" : "Light"}</span>
+              </button>
               <main>
                 <Home />
                 <div className="cx-container" aria-label="Selected deployments">

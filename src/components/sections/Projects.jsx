@@ -333,7 +333,13 @@ const ProjectDetail = ({ project, compact = false }) => (
     <motion.div variants={detailItem} className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-400/10 pt-4">
       {project.links?.length ? (
         project.links.map((l) => (
-          <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="cx-btn-ghost px-4 py-2 text-[11px]">
+          <a
+            key={l.url}
+            href={l.url}
+            target="_blank"
+            rel="noreferrer"
+            className={cx(l.primary ? "cx-btn-primary" : "cx-btn-ghost", "px-4 py-2 text-[11px] sm:px-4 sm:py-2")}
+          >
             <Icon name={l.icon || "ri-external-link-line"} className="text-[14px]" />
             {l.label}
           </a>

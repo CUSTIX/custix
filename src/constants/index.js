@@ -15,7 +15,7 @@ export const BRAND = {
 // bio/status copy; update freely.
 export const NOW = [
   { icon: "ri-rocket-line", label: "SHIPPING", value: "ProSupport Squad — Laravel/Blade marketplace for a US-based team" },
-  { icon: "ri-flashlight-line", label: "EXPLORING", value: "Expanding the stack through R&D on the side" },
+  { icon: "ri-flashlight-line", label: "EXPLORING", value: "DevOps, MCP and PWAs, shipped in RestoCore and Abot" },
   { icon: "ri-map-pin-2-line", label: "BASED IN", value: "Bacolod City, Philippines · GMT+8" },
 ];
 
@@ -39,6 +39,7 @@ export const SECTIONS = RAIL_LINKS.map((l) => l.id);
 
 // Ticker under the hero: where the work has shipped.
 export const DEPLOYED_FOR = [
+  "RESTOCORE + ABOT · LIVE DEMOS",
   "PROSUPPORT SQUAD · US",
   "DHSUD · NEGROS ISLAND REGION",
   "BACOLOD CITY FLOOD MAP",
@@ -91,6 +92,42 @@ export const FEATURED_PROJECT = {
 // Without links the panel offers "walkthrough on request" via the contact form.
 export const PROJECTS = [
   {
+    id: 6,
+    title: "Abot",
+    subtitle: "Payday-first Money App // Live Demo",
+    attention: true,
+    badge: "LIVE DEMO",
+    description:
+      "A money app built around Filipino paydays (kinsenas). Its home screen answers one question: how much is safe to spend today until the next payday, after bills, utang and paluwagan shares are set aside. Quick add understands Taglish like “kape 150 gcash” and learns your words. “Abot”, as in aabot ba hanggang sahod?",
+    image: "/pictures/ABOT_SS.webp",
+    tags: ["React", "TypeScript", "Django", "PostgreSQL", "Docker", "PWA"],
+    features: ["Safe-to-spend Engine per Pay Cycle", "Utang, Paluwagan & Ipon Goals", "Installable Offline-ready PWA"],
+    impact:
+      "Pay-cycle math as pure, unit-tested functions; 106 backend and 31 frontend tests, a clean accessibility audit, and data isolation tested on every endpoint.",
+    links: [
+      { label: "Live demo", url: "https://abot-ph.onrender.com", icon: "ri-external-link-line", primary: true },
+      { label: "Source code", url: "https://github.com/CUSTIX/Abot", icon: "ri-github-fill" },
+    ],
+  },
+  {
+    id: 5,
+    title: "RestoCore",
+    subtitle: "Restaurant Management System // Live Demo",
+    attention: true,
+    badge: "LIVE DEMO",
+    description:
+      "An all-in-one restaurant system: public site and table bookings, QR ordering (customers order from their phone, the cashier charges by code), a stock-aware point of sale, kitchen board, inventory, staff schedules, attendance and leave, and a demo payroll. Five roles, each seeing only what it may use, plus an owner AI assistant and a read-only MCP server that answer questions about the restaurant.",
+    image: "/pictures/RESTOCORE_SS.webp",
+    tags: ["Django", "PostgreSQL", "Docker", "GitHub Actions", "MCP", "Python"],
+    features: ["QR Table Ordering & Stock-aware POS", "Role-based Access on Every View", "CI/CD with Tests, CodeQL & Dependency Audit"],
+    impact:
+      "Deployed live and free to run, backed by 667 automated tests, a strict Content Security Policy, and CI that checks every URL refuses the wrong role.",
+    links: [
+      { label: "Live demo", url: "https://restocore.onrender.com", icon: "ri-external-link-line", primary: true },
+      { label: "Source code", url: "https://github.com/CUSTIX/RestoCore", icon: "ri-github-fill" },
+    ],
+  },
+  {
     id: 1,
     title: "Bacolod City Flood Map & Alert System",
     subtitle: "Real-time Monitoring & Alert System",
@@ -141,10 +178,12 @@ export const PROJECTS = [
   },
 ];
 
-// systems = archive entries + the featured case study
+// systems = archive entries + the featured case study; live demos = projects with a
+// primary "Live demo" link (click-through proof beats a technology count).
+export const LIVE_DEMOS = PROJECTS.filter((p) => p.links?.some((l) => l.primary));
 export const HERO_STATS = [
   { value: PROJECTS.length + 1, suffix: "", label: "MAJOR SYSTEMS" },
-  { value: 12, suffix: "+", label: "TECHNOLOGIES" },
+  { value: LIVE_DEMOS.length, suffix: "", label: "LIVE DEMOS" },
 ];
 
 // Short quotes from people the systems were built for.
@@ -204,7 +243,7 @@ export const FRAMEWORKS = [
 ];
 
 // Services and tools used across the shipped systems (text chips, no logos).
-export const TOOLS = ["PostgreSQL", "Stripe", "Twilio", "Wise", "DigitalOcean", "Cloudflare", "Leaflet", "Open-Meteo API", "Linux", "Git"];
+export const TOOLS = ["TypeScript", "PostgreSQL", "Stripe", "Twilio", "Wise", "DigitalOcean", "Cloudflare", "Leaflet", "Open-Meteo API", "Linux", "Git", "Docker", "GitHub Actions"];
 
 export const PROFICIENCY = [
   { name: "REACT", level: 9 },
@@ -272,6 +311,10 @@ export const PALETTE_ITEMS = [
   { label: "About", hint: "Who I am", href: "#about", icon: "ri-user-line" },
   { label: "Stack", hint: "Languages & frameworks", href: "#stack", icon: "ri-code-s-slash-line" },
   { label: "Engineered works", hint: "ProSupport Squad", href: "#work", icon: "ri-rocket-line" },
+  ...LIVE_DEMOS.map((p) => {
+    const demo = p.links.find((l) => l.primary);
+    return { label: `${p.title} live demo`, hint: demo.url.replace("https://", ""), href: demo.url, icon: "ri-external-link-line", external: true };
+  }),
   { label: "Deployments", hint: "Experience timeline", href: "#path", icon: "ri-time-line" },
   { label: "Contact", hint: "Get in touch", href: "#contact", icon: "ri-mail-line" },
   ...SOCIAL_LINKS.map((s) => ({ label: s.name, hint: s.hint, href: s.url, icon: s.icon, external: true })),
@@ -297,6 +340,16 @@ export const FAQ_RESPONSES = [
     keywords: ["prosupport", "squad", "marketplace", "virtual assistant"],
     response:
       "ProSupport Squad is a U.S.-based virtual-assistant marketplace John engineered on Laravel and Blade: verified profiles, hiring flow, a live agent dashboard with time tracking, and Stripe/Twilio/Wise integrations, deployed on DigitalOcean behind Cloudflare.",
+  },
+  {
+    keywords: ["abot", "sahod", "payday", "kinsenas", "budget", "finance", "money app", "utang", "paluwagan", "pwa"],
+    response:
+      "Abot is John's payday-first money app for Filipinos (React + TypeScript on a Django API), live at abot-ph.onrender.com with a one-tap demo account. It shows how much is safe to spend today until the next payday, after bills, utang and paluwagan shares are set aside, with quick add for Taglish like 'kape 150 gcash', payday split rules, ipon goals and a cycle report. It installs on a phone as a PWA; source at github.com/CUSTIX/Abot.",
+  },
+  {
+    keywords: ["restocore", "restaurant", "cafe", "point of sale", "mcp", "docker", "devops", "live demo"],
+    response:
+      "RestoCore is John's restaurant management system, live at restocore.onrender.com (one-click demo logins per role). Django + PostgreSQL in Docker, with bookings, QR table ordering, a stock-aware POS, kitchen board, inventory, staff scheduling and a demo payroll, plus an owner AI assistant and a read-only MCP server. 667 tests and CI with CodeQL; source at github.com/CUSTIX/RestoCore.",
   },
   {
     keywords: ["sentinels", "thesis", "rpg", "cybersecurity"],
@@ -326,6 +379,6 @@ export const FAQ_RESPONSES = [
   {
     keywords: ["project", "work", "built", "portfolio", "case study"],
     response:
-      "Highlights: ProSupport Squad (the featured case study), the Bacolod City Flood Map & Alert System, two DHSUD government systems (HOA CDD and ELUPDD), and SENTINELS, an awarded 2nd Best Thesis. Open the Project archive rows to see each one.",
+      "Highlights: ProSupport Squad (the featured case study), RestoCore (a restaurant system with a live demo), Abot (a payday-first money app, also live), the Bacolod City Flood Map & Alert System, two DHSUD government systems (HOA CDD and ELUPDD), and SENTINELS, an awarded 2nd Best Thesis. Open the Project archive rows to see each one.",
   },
 ];
