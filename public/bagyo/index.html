@@ -61,7 +61,8 @@
   .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--land), var(--amber), var(--hot)); }
   .note { font-size: .66rem; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
   .note a { color: var(--land); }
-  footer { font-size: .66rem; color: var(--muted); letter-spacing: .04em; }
+  footer { font-size: .66rem; color: var(--muted); letter-spacing: .04em; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
+  footer .credits { opacity: .8; }
   dialog { background: #0a1a45; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 0; width: min(560px, calc(100% - 32px)); }
   dialog::backdrop { background: rgba(2, 8, 24, .7); }
   .dlg { padding: 18px; display: grid; gap: 10px; font-size: .82rem; line-height: 1.5; }
@@ -141,7 +142,8 @@
       Don't have it? <a href="https://open.spotify.com/search/ako%20ang%20bagyo%20shean" target="_blank" rel="noopener">Find "Ako ang Bagyo" by SHEAN</a>.</p>
   </section>
 </div>
-<footer id="status">Load the song, then press Start. Without a song the storm runs on its own for 90 seconds.</footer>
+<footer><span id="status">Load the song, then press Start. Without a song the storm runs on its own for 90 seconds.</span>
+  <span class="credits">Fan-made, for fun. "Ako ang Bagyo" © SHEAN and its rights holders: this page does not host the song or its lyrics; they play only from your own device. Map: Natural Earth (public domain). Not a weather forecast.</span></footer>
 
 <script>
 (() => {
