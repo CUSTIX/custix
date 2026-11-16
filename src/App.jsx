@@ -33,7 +33,7 @@ import { BRAND } from "./constants";
 import { SoundContext } from "./context/sound";
 import { DEPLOYED_FOR, SECTIONS } from "./constants";
 import { cx } from "./utils/cx";
-import { scrollToSection } from "./utils/scroll";
+import { NAV_HEIGHT, scrollToSection } from "./utils/scroll";
 
 const INTRO_SEEN_KEY = "cx-intro-seen";
 const introAlreadySeen = () => {
@@ -109,9 +109,26 @@ function App() {
   useEffect(() => {
     if (!introDone) return;
     const id = window.location.hash.slice(1);
-    if (!id || !document.getElementById(id)) return;
-    const t = setTimeout(() => scrollToSection(id), 120);
-    return () => clearTimeout(t);
+    const target = id && document.getElementById(id);
+    if (!target) return;
+    // Sections above the target can still grow (reveals, images) after the first jump, so
+    // check again as the layout settles. Stop as soon as the visitor scrolls themselves.
+    let userMoved = false;
+    const stop = () => {
+      userMoved = true;
+    };
+    const events = ["wheel", "touchstart", "keydown", "pointerdown"];
+    events.forEach((name) => window.addEventListener(name, stop, { passive: true }));
+    const timers = [120, 900, 1800].map((ms, i) =>
+      setTimeout(() => {
+        const off = Math.abs(target.getBoundingClientRect().top - (NAV_HEIGHT + 12));
+        if (!userMoved && (i === 0 || off > 3)) scrollToSection(id);
+      }, ms),
+    );
+    return () => {
+      timers.forEach(clearTimeout);
+      events.forEach((name) => window.removeEventListener(name, stop));
+    };
   }, [introDone]);
 
   const activeSection = useActiveSection(SECTIONS);

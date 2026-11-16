@@ -95,12 +95,17 @@ const check = (ok, label) => {
     await page.waitForTimeout(900);
     check(await page.evaluate(() => /DHSUD HOA CDD/.test(document.getElementById("archive-panel").textContent)), "archive row opens its detail panel");
 
+    // Wait for states instead of fixed sleeps: CI runners are slower than a desktop, and the
+    // panel keeps its exit animation running for a moment after Escape.
     await page.click('button[aria-controls="cx-assistant"]');
-    await page.waitForTimeout(600);
-    check(await page.$("#cx-assistant"), "assistant panel opens");
+    const opened = await page.waitForSelector("#cx-assistant", { state: "visible", timeout: 5000 }).catch(() => null);
+    check(opened, "assistant panel opens");
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(500);
-    check(!(await page.$("#cx-assistant")), "assistant closes on Escape");
+    const closed = await page.waitForSelector("#cx-assistant", { state: "detached", timeout: 5000 }).then(
+      () => true,
+      () => false,
+    );
+    check(closed, "assistant closes on Escape");
 
     check(errors.length === 0, `no console/page errors on desktop${errors.length ? `: ${errors[0]}` : ""}`);
 
@@ -108,6 +113,9 @@ const check = (ok, label) => {
     const dp = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await dp.goto(`${URL}#work`, { waitUntil: "networkidle" });
     await dp.waitForTimeout(4500);
+    await dp
+      .waitForFunction(() => Math.abs(document.getElementById("work").getBoundingClientRect().top - 88) <= 4, null, { timeout: 8000 })
+      .catch(() => {});
     const workTop = await dp.evaluate(() => Math.round(document.getElementById("work").getBoundingClientRect().top));
     check(Math.abs(workTop - 88) <= 4, `deep link /#work lands under the nav after the intro (top=${workTop}px)`);
     await dp.close();
