@@ -79,7 +79,7 @@ const check = (ok, label) => {
     for (const id of ["top", "about", "stack", "work", "path", "contact"]) {
       check(await page.$(`#${id}`), `section #${id} present`);
     }
-    check(await page.$("#top canvas"), "3D hero mark mounted (WebGL)");
+    check(await page.$("#top h1"), "hero heading present");
 
     await page.keyboard.press("Control+k");
     await page.waitForTimeout(400);
@@ -89,7 +89,7 @@ const check = (ok, label) => {
     const pathTop = await page.evaluate(() => Math.round(document.getElementById("path").getBoundingClientRect().top));
     check(Math.abs(pathTop - 88) <= 4, `palette jumps to #path under the nav (top=${pathTop}px)`);
 
-    const row = page.locator('button[aria-controls="archive-panel"]').nth(1);
+    const row = page.locator('button[aria-controls="archive-panel"]', { hasText: "DHSUD HOA CDD" });
     await row.scrollIntoViewIfNeeded();
     await row.click();
     await page.waitForTimeout(900);
