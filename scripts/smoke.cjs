@@ -63,7 +63,18 @@ const check = (ok, label) => {
   const exe = findChrome();
   if (!exe) throw new Error("No Chromium found. Set CHROME_PATH or run `npx playwright install chromium`.");
 
-  const server = spawn(`npx vite preview --port ${PORT} --strictPort`, { stdio: "ignore", shell: true });
+  // Own process group on Linux/macOS, so stopping it also stops vite (not just the shell),
+  // and the next CI step (Lighthouse) can use the same port.
+  const windows = process.platform === "win32";
+  const server = spawn(`npx vite preview --port ${PORT} --strictPort`, { stdio: "ignore", shell: true, detached: !windows });
+  const stopServer = () => {
+    try {
+      if (windows) spawn("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+      else process.kill(-server.pid, "SIGTERM");
+    } catch {
+      server.kill();
+    }
+  };
   try {
     await waitFor(URL);
     const browser = await chromium.launch({ executablePath: exe, headless: true, args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
@@ -155,7 +166,7 @@ const check = (ok, label) => {
 
     await browser.close();
   } finally {
-    server.kill();
+    stopServer();
   }
 
   if (failures.length) {
