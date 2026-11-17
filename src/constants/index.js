@@ -15,7 +15,7 @@ export const BRAND = {
 // bio/status copy; update freely.
 export const NOW = [
   { icon: "ri-rocket-line", label: "SHIPPING", value: "ProSupport Squad — Laravel/Blade marketplace for a US-based team" },
-  { icon: "ri-flashlight-line", label: "EXPLORING", value: "RAG, DevOps, MCP and PWAs, shipped in Batas, RestoCore and Abot" },
+  { icon: "ri-flashlight-line", label: "EXPLORING", value: "RAG, DevOps, MCP and PWAs, shipped in Tala, Batas, RestoCore and Abot" },
   { icon: "ri-map-pin-2-line", label: "BASED IN", value: "Bacolod City, Philippines · GMT+8" },
 ];
 
@@ -39,7 +39,7 @@ export const SECTIONS = RAIL_LINKS.map((l) => l.id);
 
 // Ticker under the hero: where the work has shipped.
 export const DEPLOYED_FOR = [
-  "BATAS + RESTOCORE + ABOT · LIVE DEMOS",
+  "TALA + BATAS + RESTOCORE + ABOT · LIVE DEMOS",
   "PROSUPPORT SQUAD · US",
   "DHSUD · NEGROS ISLAND REGION",
   "BACOLOD CITY FLOOD MAP",
@@ -91,6 +91,24 @@ export const FEATURED_PROJECT = {
 // Optional per project: `links: [{ label, url }]` (repo, live demo, write-up).
 // Without links the panel offers "walkthrough on request" via the contact form.
 export const PROJECTS = [
+  {
+    id: 8,
+    title: "Tala",
+    subtitle: "Class Record for Filipino Teachers // Live Demo",
+    attention: true,
+    badge: "LIVE DEMO",
+    description:
+      "A class record built for how Filipino teachers work: take attendance by tapping faces on the seat plan, calling names one by one, or scanning learners' QR cards with a phone. Rearrange seats by drag or shuffle, compute quarterly grades the DepEd way (weights, transmutation), and see the least-mastered competencies from item-by-item quiz checking. “Tala” means record, and star.",
+    image: "/pictures/TALA_SS.webp",
+    tags: ["Django", "PostgreSQL", "Docker", "JavaScript", "QR", "GitHub Actions"],
+    features: ["Seat-plan, Roll-call & QR Attendance", "DepEd Grade Computation & Item Analysis", "Private Demo per Visitor"],
+    impact:
+      "Grade math tested at every transmutation band edge; a test walks every URL to prove other teachers get 404; works without JavaScript under a strict CSP. 105 tests at 96% coverage.",
+    links: [
+      { label: "Live demo", url: "https://tala-ph.onrender.com", icon: "ri-external-link-line", primary: true },
+      { label: "Source code", url: "https://github.com/CUSTIX/Tala", icon: "ri-github-fill" },
+    ],
+  },
   {
     id: 7,
     title: "Batas",
@@ -360,6 +378,11 @@ export const FAQ_RESPONSES = [
       "ProSupport Squad is a U.S.-based virtual-assistant marketplace John engineered on Laravel and Blade: verified profiles, hiring flow, a live agent dashboard with time tracking, and Stripe/Twilio/Wise integrations, deployed on DigitalOcean behind Cloudflare.",
   },
   {
+    keywords: ["tala", "teacher", "class record", "attendance", "seat plan", "grade", "deped", "item analysis", "qr code", "school"],
+    response:
+      "Tala is John's class record for Filipino teachers, live at tala-ph.onrender.com (one tap creates a private demo with made-up learners). Attendance by tapping the seat plan, one-by-one roll call or scanning learners' QR cards; a drag-and-shuffle seat plan; DepEd grade computation with transmutation; item analysis with least-mastered competencies; a recitation picker and read-only parent links. Django + PostgreSQL, 105 tests; source at github.com/CUSTIX/Tala.",
+  },
+  {
     keywords: ["batas", " rag", "rag?", "retrieval", "labor", "labour", "legal", "citation", "embedding", "pgvector", "gemini"],
     response:
       "Batas is John's RAG project: ask Philippine labor law a question in English or Taglish and get the Labor Code articles that answer it, live at batas-ph.onrender.com. Django + PostgreSQL with pgvector; keyword (BM25) and meaning search fused by reciprocal rank fusion, Gemini answers only from the retrieved articles, and every citation is checked. Retrieval is scored in CI (100% recall@5 tuning, 75% held-out). Source at github.com/CUSTIX/Batas.",
@@ -402,6 +425,6 @@ export const FAQ_RESPONSES = [
   {
     keywords: ["project", "work", "built", "portfolio", "case study"],
     response:
-      "Highlights: ProSupport Squad (the featured case study), RestoCore (a restaurant system with a live demo), Abot (a payday-first money app, also live), Batas (labor-law Q&A with checked citations, a live RAG demo), the Bacolod City Flood Map & Alert System, two DHSUD government systems (HOA CDD and ELUPDD), and SENTINELS, an awarded 2nd Best Thesis. Open the Project archive rows to see each one.",
+      "Highlights: ProSupport Squad (the featured case study), RestoCore (a restaurant system with a live demo), Abot (a payday-first money app, also live), Batas (labor-law Q&A with checked citations, a live RAG demo), Tala (a class record for teachers, also live), the Bacolod City Flood Map & Alert System, two DHSUD government systems (HOA CDD and ELUPDD), and SENTINELS, an awarded 2nd Best Thesis. Open the Project archive rows to see each one.",
   },
 ];
