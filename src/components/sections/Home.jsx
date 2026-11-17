@@ -66,7 +66,7 @@ export const Home = () => {
             className={`cx-hero-wordmark ${fillClass}`}
           >
             CUST
-            <span className="bg-[linear-gradient(120deg,#7dd3fc,#2f80f5_55%,#1d3fd0)] bg-clip-text text-transparent">IX</span>
+            <span className="bg-[linear-gradient(120deg,#7dd3fc,#2f80f5_55%,#1d3fd0)] bg-clip-text pr-[0.14em] -mr-[0.14em] text-transparent">IX</span>
           </h1>
         </Parallax>
 
