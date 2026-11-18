@@ -24,6 +24,7 @@ export const NAV_LINKS = [
   { name: "About", id: "about" },
   { name: "Stack", id: "stack" },
   { name: "Work", id: "work" },
+  { name: "Services", id: "services" },
   { name: "Path", id: "path" },
 ];
 
@@ -368,6 +369,11 @@ export const FAQ_RESPONSES = [
     response: "Hey — ask me anything about John's projects, stack, or experience.",
   },
   {
+    keywords: ["service", "offer", "price", "pricing", "quote", "cost", "how much", "magkano", "build for", "client"],
+    response:
+      "John builds restaurant and café systems (like RestoCore), school and teacher tools (like Tala), AI assistants that answer from your own documents with citations (like Batas), and custom web apps that replace spreadsheets (like Abot). Each one has a live demo in the Services section. Pricing depends on scope: it starts with a free 30-minute call, then a fixed written quote. Use the contact form below.",
+  },
+  {
     keywords: ["open to work", "open for work", "available", "availability", "hire", "hiring", "freelance", "contact", "email", "reach", "message"],
     response:
       "Yes — John is currently a Software Engineer at a US-based company and still takes on project inquiries, system audits, and collaborations. Use the contact form at the bottom of the page and he'll reply personally, usually within 24 hours.",
@@ -427,4 +433,44 @@ export const FAQ_RESPONSES = [
     response:
       "Highlights: ProSupport Squad (the featured case study), RestoCore (a restaurant system with a live demo), Abot (a payday-first money app, also live), Batas (labor-law Q&A with checked citations, a live RAG demo), Tala (a class record for teachers, also live), the Bacolod City Flood Map & Alert System, two DHSUD government systems (HOA CDD and ELUPDD), and SENTINELS, an awarded 2nd Best Thesis. Open the Project archive rows to see each one.",
   },
+];
+
+// "Services": what a client can hire John for, each backed by a live demo they can try first.
+// No prices on the page: scope varies, and every quote starts with a free call.
+export const SERVICES = [
+  {
+    icon: "ri-briefcase-line",
+    title: "Restaurant & café system",
+    who: "Cafés, restaurants, food stalls",
+    points: ["Bookings, POS and QR table ordering", "Kitchen board and stock that deducts per order", "Staff schedules, attendance, roles per staff"],
+    demo: { label: "Try RestoCore", url: "https://restocore.onrender.com" },
+  },
+  {
+    icon: "ri-graduation-cap-line",
+    title: "School & teacher tools",
+    who: "Schools, review centers, tutors",
+    points: ["Attendance by seat plan or QR card", "DepEd-style grade computation", "Item analysis and parent links"],
+    demo: { label: "Try Tala", url: "https://tala-ph.onrender.com" },
+  },
+  {
+    icon: "ri-cpu-line",
+    title: "AI assistant over your documents",
+    who: "HR teams, offices, firms",
+    points: ["Answers from your policies, manuals or laws", "Every answer cites its source", "Works in English and Filipino"],
+    demo: { label: "Try Batas", url: "https://batas-ph.onrender.com" },
+  },
+  {
+    icon: "ri-code-s-slash-line",
+    title: "Custom web app",
+    who: "Small businesses replacing spreadsheets",
+    points: ["Inventory, booking, HR or finance tools", "Logins and roles, reports and exports", "Works on phones, installable as an app"],
+    demo: { label: "Try Abot", url: "https://abot-ph.onrender.com" },
+  },
+];
+
+export const PROCESS = [
+  { step: "01", title: "Free 30-minute call", text: "You show me how the work is done today; I show you a live demo." },
+  { step: "02", title: "Fixed scope and quote", text: "A short written plan: what's included, the price and the timeline." },
+  { step: "03", title: "Weekly progress on a live link", text: "You click through the real thing every week, not slides." },
+  { step: "04", title: "Launch and 30 days of support", text: "Hosting set up, your team trained, bugs fixed for a month." },
 ];

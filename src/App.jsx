@@ -19,6 +19,7 @@ import { About } from "./components/sections/About";
 import { Stack } from "./components/sections/Stack";
 import { Projects } from "./components/sections/Projects";
 import { Signals } from "./components/sections/Signals";
+import { Services } from "./components/sections/Services";
 import { Path } from "./components/sections/Path";
 import { Contact } from "./components/sections/Contact";
 import { IntroContext } from "./context/intro";
@@ -214,6 +215,7 @@ function App() {
                 <About />
                 <Stack />
                 <Projects />
+                <Services />
                 <Signals />
                 <Path />
                 <Contact />
